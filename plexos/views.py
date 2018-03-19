@@ -2,7 +2,11 @@
 from __future__ import unicode_literals
 from django.shortcuts import render, loader
 from django.http import HttpResponse, HttpResponseRedirect
+from django.template import RequestContext
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.contrib.auth import authenticate 
+from .models import *
 import subprocess
 import os
 import re
@@ -31,23 +35,38 @@ def login(request):
 			c = dict({ 'message': message, })
 			return HttpResponse(t.render(c,request=request))
 
+		
+@login_required
 def profile(request):
 	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 	if request.method == "GET": 
+		print "Get"
 		return render(request, "profile.html")
 	elif request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		server = request.POST['server']
-		p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], stdin=subprocess.PIPE)
-		p.stdin.write(server+'\n')
-		p.stdin.write(username+'\n')
-		p.stdin.write(password+'\n')
-		stdout,stderr = p.communicate()
-		print(stdout)
-		print (stderr)
-		return HttpResponse(stderr, content_type="text/plain")
-
+		print "POST"
+		print request.POST; 
+		if request.POST.get('connectButton'): 
+			print "HERE"
+			username = request.POST['username']
+			password = request.POST['password']
+			server = request.POST['server']
+			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], stdin=subprocess.PIPE)
+			p.stdin.write(server+'\n')
+			p.stdin.write(username+'\n')
+			p.stdin.write(password+'\n')
+			stdout,stderr = p.communicate()
+			message = ""
+			t = ""
+			if stderr: 
+				message ='Form submission successful'
+			else: 
+				userInfo = UserInfo.objects.filter(Username=username)
+				if len(userInfo) == 0: 
+					newUser = UserInfo.create(server, username, password)
+				message = 'Form submission successful'
+			print message
+			return render(request, "profile.html", {message: message})
+		
 
 #def connect_function( server, port, username, password): 
 #	return subprocess.check_call(['/../Python-PLEXOS-API/Connect Server/connect.py'])

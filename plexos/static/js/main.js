@@ -1,4 +1,4 @@
-$("#connectServer").hide();
+$("#connectServer").show();
 
 function showConnectServerDiv() {
     $("#connectServer").show();
