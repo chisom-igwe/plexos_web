@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load addstr %}
 
 {% block body %}
 <body>
-    <div class="container" >
+    <div class="container">
         <header>
-            {{message}}
             <div class="navbar navbar-default navbar-fixed-top blue">
                 <div class="container p-none">
                     <div class="navbar-header">
@@ -37,7 +37,7 @@
             </div>
         </header>
         <div>
-            
+
             <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-justified">
                 <li class="nav-item">
@@ -51,11 +51,18 @@
                 </li>
             </ul>
             <!-- Tab panels -->
-            <p>{{message}}</p>
+            <img src="{% static '\img\LoadingBasketContents.gif' %}" id="loader" style="display:none"/ >
+            {% if message %}
+            {% include "messages/"|addstr:message.type|addstr:".html" with message=message.value %}
+            {% endif %}
             <div class="tab-content card">
                 {% include "solution.html" %}
                 {% include "input.html" %}
-                {% include "connect.html" %}
+                {% if userInfo %}
+                {% include "connect.html" with userUsername=userInfo.Username userServer=userInfo.Server %}
+                {% else %}
+                {% include "connect.html" with userUsername="Username" userServer="Server" %}
+                {% endif %}
             </div>
         </div>
     </div>

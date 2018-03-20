@@ -1,9 +1,8 @@
-$("#connectServer").show();
-
-function showConnectServerDiv() {
-    $("#connectServer").show();
-}
-
-function hideConnectServerDiv() {
-    $("#connectServer").hide();
-}
+$('#connectServerConnectButton').click(function (e) {
+    $('#loader').show(); //<----here
+    $.ajax({
+            success: function(result) {
+                $('#loader').hide();  //<--- hide again
+            }
+    })
+})

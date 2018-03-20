@@ -40,33 +40,31 @@ def login(request):
 def profile(request):
 	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 	if request.method == "GET": 
-		print "Get"
 		return render(request, "profile.html")
 	elif request.method == "POST":
-		print "POST"
-		print request.POST; 
 		if request.POST.get('connectButton'): 
-			print "HERE"
 			username = request.POST['username']
 			password = request.POST['password']
 			server = request.POST['server']
+			message = ""
+			userInfo = ""
 			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], stdin=subprocess.PIPE)
 			p.stdin.write(server+'\n')
 			p.stdin.write(username+'\n')
 			p.stdin.write(password+'\n')
 			stdout,stderr = p.communicate()
-			message = ""
-			t = ""
-			if stderr: 
-				message ='Form submission successful'
-			else: 
-				userInfo = UserInfo.objects.filter(Username=username)
-				if len(userInfo) == 0: 
-					newUser = UserInfo.create(server, username, password)
-				message = 'Form submission successful'
-			print message
-			return render(request, "profile.html", {message: message})
-		
-
-#def connect_function( server, port, username, password): 
-#	return subprocess.check_call(['/../Python-PLEXOS-API/Connect Server/connect.py'])
+			if p.returncode != 0: 
+				#raise RuntimeError("%r failed, status code %s stdout %r stderr %r" % (
+				#	['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], p.returncode, stdout, stderr))
+				message = dict({"value" : 'Error Connecting to server. Ensure that you entered the corrent server, username and password. Please try again', "type" : "error"})
+			else:
+				userLen = UserInfo.objects.filter(Username=username)
+				if userLen == 0: 
+					userInfo = UserInfo.create(server, username, password)
+				else: 
+					userInfo = UserInfo.objects.filter(Username=username)[0]
+				message = dict({"value" : 'Successfully Connected to Server', 
+							"type" : "success"}) 
+			t = loader.get_template("profile.html")
+			c = dict({"message": message, "userInfo" : userInfo})
+			return HttpResponse(t.render(c, request=request))

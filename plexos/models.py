@@ -12,9 +12,6 @@ class UserInfo(models.Model):
     Server = models.CharField(max_length=10)
     Username = models.CharField(max_length=35)
     Password = models.CharField(max_length=35)
-    Folder = models.CharField(max_length=35)
-    Dataset = models.CharField(max_length=35)
-    Jobset = models.CharField(max_length=35)
 
     @classmethod
     def create(cls, server, username, password): 

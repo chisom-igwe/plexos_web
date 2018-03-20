@@ -9,17 +9,17 @@
             {% csrf_token %}
             <p>
                 <label for="inputServer">Server</label>
-                <input name="server" type="text" id="inputServer" class="form-control" placeholder="Server" required autofocus>
+                <input style="width: 25%;" name="server" type="text" id="inputServer" class="form-control" placeholder={{ userServer }} required autofocus>
                 <label for="inputPassword">Username</label>
-                <input name="username" type="text" id="inputConnectPassword" class="form-control" placeholder="Username" required autofocus>
+                <input style="width: 25%" name="username" type="text" id="inputConnectPassword" class="form-control" placeholder={{userUsername}} required autofocus>
                 <label for="inputPassword">Password</label>
-                <input name="password" type="password" id="inputConnectPassword" class="form-control" placeholder="Password" required autofocus>
+                <input style="width: 25%" name="password" type="password" id="inputConnectPassword" class="form-control" placeholder="Password" required autofocus>
             </p>
             <div style="padding: 20px 0px">
                 <label style="float:left"><input type="checkbox"> Remember me</label>
                 <div style="float:right">
                     <button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="btn btn-primary">Connect</button>
-                    <button id="connectServerCloseButton" onclick="hideConnectServerDiv()" type="button" class="btn btn-danger">Cancel</button>
+                    <!--<button id="connectServerCloseButton" onclick="hideConnectServerDiv()" type="button" class="btn btn-danger">Cancel</button>-->
                 </div>
             </div>
         </form>
