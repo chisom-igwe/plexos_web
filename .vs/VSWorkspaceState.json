@@ -4,13 +4,13 @@
     "\\plexos",
     "\\plexos\\migrations",
     "\\plexos\\static",
-    "\\plexos\\static\\css",
-    "\\plexos\\static\\js",
+    "\\plexos\\static\\img",
     "\\plexos\\templates",
     "\\plexos\\templates\\messages",
     "\\Python-PLEXOS-API",
-    "\\Python-PLEXOS-API\\Connect Server"
+    "\\Python-PLEXOS-API\\Connect Server",
+    "\\Python-PLEXOS-API\\Input Files"
   ],
-  "SelectedNode": "\\plexos\\static\\css\\style.css",
+  "SelectedNode": "\\plexos\\views.py",
   "PreviewInSolutionExplorer": false
 }

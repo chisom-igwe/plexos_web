@@ -6,3 +6,7 @@ $('#connectServerConnectButton').click(function (e) {
             }
     })
 })
+
+$('#datasetDivLink'.click(function() {
+	$("#datasetInfo").slideToggle();
+});

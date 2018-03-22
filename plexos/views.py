@@ -19,21 +19,29 @@ SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 from django.http import HttpResponse
 
 
-def login(request): 
-	"""
-		This is the view that users see if they do not log into admin
-		it colleges the user's information and send a sucess message 
-	"""
-	if request.method == "GET": 
-		c = {}
-		return render(request, "login.html",c)
-	if request.method == "POST":
-		user = authenticate(username= request.POST.get('username', ''), password = request.POST.get('password', ''))
-		if user is None: 
-			message = "Your information could not be found. Please contact Support at Energy Exemplar."
-			t = loader.get_template('messages/error.html')
-			c = dict({ 'message': message, })
-			return HttpResponse(t.render(c,request=request))
+from django.contrib.auth import (login as auth_login,  authenticate)
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+from django.core.urlresolvers import reverse
+
+def login(request):
+	_message = ""
+	if request.method == 'POST':
+		_username = request.POST['username']
+		_password = request.POST['password']
+		user = authenticate(username=_username, password=_password)
+		if user is not None:
+			if user.is_active:
+				auth_login(request, user)
+				return HttpResponseRedirect(reverse('connect'))
+			else:
+				_message = 'Your account is not activated'
+		else:
+			_message = 'Invalid login, please try again.'
+	t = loader.get_template("login.html")
+	c = dict({"message": _message})
+	return HttpResponse(t.render(c, request=request)) 
+
 
 		
 @login_required
@@ -41,6 +49,14 @@ def profile(request):
 	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 	if request.method == "GET": 
 		return render(request, "profile.html")
+
+	
+
+@login_required
+def connect(request): 
+	PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
+	if request.method == "GET": 
+		return profile(request)
 	elif request.method == "POST":
 		if request.POST.get('connectButton'): 
 			username = request.POST['username']
@@ -48,11 +64,29 @@ def profile(request):
 			server = request.POST['server']
 			message = ""
 			userInfo = ""
-			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], stdin=subprocess.PIPE)
+			folder = dict()
+			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 			p.stdin.write(server+'\n')
 			p.stdin.write(username+'\n')
 			p.stdin.write(password+'\n')
 			stdout,stderr = p.communicate()
+			folder["db1"] = {"1.1", "0.1"}
+			folder["db2"] = {"1.3", "0.1"}
+			#Taking tooo lone
+			#for line in stdout.splitlines(): 
+			#	if username in line: 
+			#		datasetList = re.findall(r'dataset (.*?) version', line, re.DOTALL)
+			#		dataset = ""
+			#		for words in datasetList: 
+			#			dataset += str(words)
+			#		versionList = re.findall(r'version (.*?)$', line, re.DOTALL)
+			#		version = ""
+			#		for words in versionList: 
+			#			version += str(words) 
+			#		if dataset in folder: 
+			#			folder[dataset].append(version)
+			#		else: 
+			#			folder[dataset]= [version]
 			if p.returncode != 0: 
 				#raise RuntimeError("%r failed, status code %s stdout %r stderr %r" % (
 				#	['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/connect.py')], p.returncode, stdout, stderr))
@@ -66,5 +100,5 @@ def profile(request):
 				message = dict({"value" : 'Successfully Connected to Server', 
 							"type" : "success"}) 
 			t = loader.get_template("profile.html")
-			c = dict({"message": message, "userInfo" : userInfo})
-			return HttpResponse(t.render(c, request=request))
+			c = dict({"message": message, "userInfo" : userInfo, "folder": folder})
+			return HttpResponse(t.render(c, request=request)) 
