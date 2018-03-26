@@ -16,7 +16,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="/"><img src="{% static '/img/PLEXOS_2016_EE.png' %}" alt="img" /></a>
+                        <a class="navbar-brand" href="/">Plexos by Energy Exemplar</a>
                     </div>
                     <div class="collapse navbar-collapse">
 
@@ -57,15 +57,15 @@
             {% endif %}
             
 
-            <div class="tab-content card">
-                {% include "solution.html" %}
-                {% include "input.html" %}
-                {% if userInfo %}
-                {% include "connect.html" with userUsername=userInfo.Username userServer=userInfo.Server %}
-                {% else %}
-                {% include "connect.html" with userUsername="Username" userServer="Server" %}
-                {% endif %}
-            </div>
+			<div class="tab-content card">
+				{% include "solution.html" %}
+				{% include "input.html" %}
+				{% if userInfo %}
+				{% include "connect.html" with userUsername=userInfo.Username userServer=userInfo.Server userPassword=userInfo.Password %}
+				{% else %}
+				{% include "connect.html" with userUsername="Username" userServer="Server" %}
+				{% endif %}
+			</div>
         </div>
     </div>
 </body>

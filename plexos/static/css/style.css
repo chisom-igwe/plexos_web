@@ -117,8 +117,38 @@ body {
 	display: none;
 }
 
+#datasetPopupDiv{
+	display: none; 
+}
+
+figure {
+	display: inline-block;
+	margin: 20px; /* adjust as needed */
+}
+
+figure img {
+	vertical-align: top;
+}
+#loader {
+	margin: auto;
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+}
+figure figcaption {
+	text-align: center;
+}
+
+table {
+	display: block;
+	overflow-x: auto;
+	white-space: nowrap;
+}
+
 @media screen and (max-width: 767px) {
-    .dropdown-menu > li {
+	.dropdown-menu > li {
         display: block;
     }
 }

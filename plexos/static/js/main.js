@@ -1,12 +1,3 @@
-$('#connectServerConnectButton').click(function (e) {
-    $('#loader').show(); //<----here
-    $.ajax({
-            success: function(result) {
-                $('#loader').hide();  //<--- hide again
-            }
-    })
+$('button').click(function (e) {
+	$('#loader').show(); //<----here
 })
-
-$('#datasetDivLink'.click(function() {
-	$("#datasetInfo").slideToggle();
-});

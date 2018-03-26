@@ -2,49 +2,87 @@
 
 {% block body %}
 <div class="tab-pane fade in show active" id="panel1" role="tabpanel">
-	<div id="datasetInfo" class="popup">
+	<div id="loading" class="popup">
 		Some info for now
 	</div>
-    <div class="row">
-        <h3> Connect To Server </h3>
-        <hr />
-        <form method="POST" action="" class="form-inline">
-            {% csrf_token %}
-            <p>
-                <label for="inputServer">Server</label>
-                <input style="width: 25%;" name="server" type="text" id="inputServer" class="form-control" placeholder={{ userServer }} required autofocus>
-                <label for="inputPassword">Username</label>
-                <input style="width: 25%" name="username" type="text" id="inputConnectPassword" class="form-control" placeholder={{userUsername}} required autofocus>
-                <label for="inputPassword">Password</label>
-                <input style="width: 25%" name="password" type="password" id="inputConnectPassword" class="form-control" placeholder="Password" required autofocus>
-            </p>
-            <div style="padding: 20px 0px">
-                <label style="float:left"><input type="checkbox"> Remember me</label>
-                <div style="float:right">
-                    <button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="btn btn-primary">Connect</button>
-                    <!--<button id="connectServerCloseButton" onclick="hideConnectServerDiv()" type="button" class="btn btn-danger">Cancel</button>-->
-                </div>
-            </div>
-        </form>
-    </div>
-    <hr />
+	<div class="row">
+		<h3> Connect To Server </h3>
+		<hr />
+		<form method="POST" action="" class="form-inline">
+			{% csrf_token %}
+			<p>
+				<label for="inputServer">Server</label>
+				<input style="width: 25%;" name="server" type="text" id="inputServer" class="form-control" placeholder={{ userServer }} required autofocus>
+				<label for="inputPassword">Username</label>
+				<input style="width: 25%" name="username" type="text" id="inputConnectPassword" class="form-control" placeholder={{userUsername}} required autofocus>
+				<label for="inputPassword">Password</label>
+				<input style="width: 25%" name="password" type="password" id="inputConnectPassword" class="form-control" placeholder="Password" required autofocus>
+			</p>
+			<div style="padding: 20px 0px">
+				<label style="float:left"><input type="checkbox"> Remember me</label>
+				<div style="float:right">
+					<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary">Connect</button>
+					<!--<button id="connectServerCloseButton" onclick="hideConnectServerDiv()" type="button" class="btn btn-danger">Cancel</button>-->
+				</div>
+			</div>
+		</form>
+	</div>
+	<hr />
+	<div class="row">
+		<h3> Upload </h3>
+		<hr />
+		<form method="POST" action="" class="form-inline">
+			{% csrf_token %}
+			<p>
+				<label for="inputDataset">Dataset</label>
+				<input style="width: 25%;" name="dataset" type="text" id="inputConnectDataset" class="form-control" placeholder={{userUsername}} required autofocus />
+			</p>
+			<div style="padding: 20px 0px">
+				<label style="float:left"><input type="checkbox"> Remember me</label>
+				<div style="float:right">
+					<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary">Connect</button>
+					<!--<button id="connectServerCloseButton" onclick="hideConnectServerDiv()" type="button" class="btn btn-danger">Cancel</button>-->
+				</div>
+			</div>
+		</form>
+	</div>
+	<hr />
 	<div class="row" id="datasetDiv">
 		<h3> Datasets </h3>
 		<hr />
-		{% for dataset,version in folder.items %}
-		<script>
-			var folderImg = document.createElement("img");
-			$('#datasetDiv').append(`
-				<span class="item" >
-					<a href="." id="datasetDivLink"> 
-						<img src={% static 'img/Spreadsheet-icon.png' %}  alt="" width="250" height="150">
-					</a>
-					<span class="caption"> {{dataset}} </span>
-				</span>
-			`)
-		</script>
-		{% endfor %}
+		<table>
+			<tr>
+				{% for dataset,versions in folder.items %}
+				{% if dataset %}
+				<td>
+					<div>
+						<a id="datasetPopupLink" onclick="displayDatasetDiv()">
+							<figure>
+								<img class="mb-4" src="{% static 'img/Spreadsheet-icon.png' %}" alt="" width="200" height="200">
+								<figcaption>{{dataset|truncatechars:15}}</figcaption>
+							</figure>
+						</a>
+						<div style="padding: 20px;">
+							<form method="POST" action="" class="form-inline">
+								{% csrf_token %}
+								<p>
+									<input style=" display: none" name="server" type="text" id="inputServer" class="form-control" value={{ userServer }} required autofocus>
+									<input style=" display: none" name="username" type="text" id="inputConnectUsername" class="form-control" value={{userUsername}} required autofocus />
+									<input style=" display: none" name="password" type="text" id="inputConnectPassword" class="form-control" value={{userPassword}} required autofocus />
+									<input style=" display: none" name="dataset" type="text" id="inputConnectDataset" class="form-control" value="{{dataset}}" required autofocus />
+									<input style=" display: none" name="version" type="text" id="inputConnectVersion" class="form-control" value="{{versions|last}}" required autofocus />
+								</p>
+								<button name="downloadButton" value="download&Button" type="submit" class="connect btn btn-primary">Download</button>
+								<button name="launchButton" value="launch&Button" type="submit" class="connect btn btn-primary">Launch</button>
+							</form>
+						</div>
+					</div>
+				</td>
+				{% endif %}
+				{% endfor %}
+			</tr>
+		</table>
 	</div>
-    <hr /> 
 </div>
+    <hr /> 
 {% endblock %}
