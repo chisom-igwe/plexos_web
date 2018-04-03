@@ -1,8 +1,32 @@
  {% load static %}
 
 {% block body %}
-<div class="tab-pane fade" id="panel3" role="tabpanel">
+<div class="tab-pane fade" id="solution" role="tabpanel">
     <div class="row">
+		<div class="row">
+			<h3> Connect To Server </h3>
+			<hr />
+			{% if sessionInfo %}
+			<h4> Currently connected to {{sessionInfo.server}} as {{sessionInfo.username}}</h4>
+			{% else %}
+			<form method="POST" action="" class="form-inline">
+				{% csrf_token %}
+				<p>
+					<label for="inputServer">Server</label>
+					<input style="width: 25%;" name="server" type="text" class="form-control" placeholder={{ userServer }} required autofocus>
+					<label for="inputPassword">Username</label>
+					<input style="width: 25%" name="username" type="text" class="form-control" placeholder={{userUsername}} required autofocus>
+					<label for="inputPassword">Password</label>
+					<input style="width: 25%" name="password" type="password" class="form-control" placeholder="Password" required autofocus>
+				</p>
+				<div style="padding: 20px 0px">
+					<div style="float:right">
+						<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary">Connect</button>
+					</div>
+				</div>
+			</form>
+			{% endif %}
+		</div>
     </div>
     <hr>
     <div class="row">

@@ -2,15 +2,16 @@
   "ExpandedNodes": [
     "",
     "\\plexos",
-    "\\plexos\\migrations",
     "\\plexos\\static",
+    "\\plexos\\static\\css",
     "\\plexos\\static\\img",
+    "\\plexos\\static\\js",
     "\\plexos\\templates",
-    "\\plexos\\templates\\messages",
+    "\\plexos\\templatetags",
+    "\\plexos_web",
     "\\Python-PLEXOS-API",
-    "\\Python-PLEXOS-API\\Connect Server",
-    "\\Python-PLEXOS-API\\Input Files"
+    "\\Python-PLEXOS-API\\Connect Server"
   ],
-  "SelectedNode": "\\plexos\\views.py",
+  "SelectedNode": "\\plexos\\static\\img\\PLEXOS_2016_EE_BLACK.png",
   "PreviewInSolutionExplorer": false
 }

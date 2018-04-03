@@ -41,13 +41,13 @@
             <!-- Nav tabs -->
             <ul class="nav nav-tabs nav-justified">
                 <li class="nav-item">
-                    <a class="nav-link active" data-toggle="tab" href="#panel1" role="tab">Connect</a>
+                    <a class="nav-link active" data-toggle="tab" data-value="#connect" href="#connect" role="tab">Connect</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#panel2" role="tab">Input Files</a>
+                    <a class="nav-link" data-toggle="tab" data-value="#input" href="#input" role="tab">Input Files</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" data-toggle="tab" href="#panel3" role="tab">Solution Files</a>
+                    <a class="nav-link" data-toggle="tab" data-value="#connect" href="#solution" role="tab">Solution Files</a>
                 </li>
             </ul>
             <!-- Tab panels -->
@@ -55,18 +55,13 @@
             {% if message %}
             {% include "messages/"|addstr:message.type|addstr:".html" with message=message.value %}
             {% endif %}
-            
-
 			<div class="tab-content card">
-				{% include "solution.html" %}
+				{% include "solution.html"  %}
 				{% include "input.html" %}
-				{% if userInfo %}
-				{% include "connect.html" with userUsername=userInfo.Username userServer=userInfo.Server userPassword=userInfo.Password %}
-				{% else %}
-				{% include "connect.html" with userUsername="Username" userServer="Server" %}
-				{% endif %}
+				{% include "connect.html"%}
+
 			</div>
-        </div>
+		</div>
     </div>
 </body>
 {% endblock %}
