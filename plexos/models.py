@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-
+from django.core.exceptions import ValidationError
 from django.db import models
 from django import forms
 
@@ -20,4 +20,4 @@ class UserInfo(models.Model):
 		return user
 
 class Source_File(models.Model): 
-	url = models.FileField()
+	url = models.FileField(upload_to='files\%H\%M\%S')

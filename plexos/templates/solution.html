@@ -1,42 +1,35 @@
- {% load static %}
+{% load static %}
 
 {% block body %}
 <div class="tab-pane fade" id="solution" role="tabpanel">
-    <div class="row">
-		<div class="row">
-			<h3> Connect To Server </h3>
-			<hr />
-			{% if sessionInfo %}
-			<h4> Currently connected to {{sessionInfo.server}} as {{sessionInfo.username}}</h4>
-			{% else %}
-			<form method="POST" action="" class="form-inline">
-				{% csrf_token %}
-				<p>
-					<label for="inputServer">Server</label>
-					<input style="width: 25%;" name="server" type="text" class="form-control" placeholder={{ userServer }} required autofocus>
-					<label for="inputPassword">Username</label>
-					<input style="width: 25%" name="username" type="text" class="form-control" placeholder={{userUsername}} required autofocus>
-					<label for="inputPassword">Password</label>
-					<input style="width: 25%" name="password" type="password" class="form-control" placeholder="Password" required autofocus>
-				</p>
-				<div style="padding: 20px 0px">
-					<div style="float:right">
-						<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary">Connect</button>
-					</div>
+	<div class="container">
+		{% if solution_files == True %}
+		<h3> Solution Plots </h3>
+		<hr />
+		<img src="{% static 'img/fuelcost.png' %}" style='height: 100%; width: 100%; object-fit: contain' alt="Fuel Cost">
+		<hr />
+		<img src="{% static 'img/generation.png' %}" style='height: 100%; width: 100%; object-fit: contain' alt="Fuel Cost">
+	</div>
+	<hr />
+	<div>
+		<h3> Solution Files </h3>
+		<hr />
+		<form method="POST" action="" name="solutionForm">
+			{% csrf_token %}
+			<h4> Download the solution in the following formats: </h4>
+			<label class="checkbox-inline">
+				<input type="checkbox" name="pandas_solution" value="pandas_solution">Pandas Solution File
+			</label>
+			<label class="checkbox-inline">
+				<input type="checkbox" name="sqlite_solution" value="sqlite_solution">Sqlite Solution File
+			</label>
+			<div style="padding: 20px 0px">
+				<div style="float:right">
+					<button name="downloadSolutionButton" id="downloadSolutionButton" value="Download&Solution&Button" type="submit" class="connect btn btn-primary">Download</button>
 				</div>
-			</form>
-			{% endif %}
-		</div>
-    </div>
-    <hr>
-    <div class="row">
-        <p> download </p>
-    </div>
-    <div>
-        <p> launch</p>
-    </div>
-    <div>
-        <p> upload </p>
-    </div>
+			</div>
+		</form>
+		{% else %} {% include "messages/notif.html" with message="Please Launch a Plexos Simulation in order to view the solution Files" type="info"%} {% endif %}
+	</div>
 </div>
 {% endblock %}

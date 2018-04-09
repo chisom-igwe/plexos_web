@@ -5,6 +5,8 @@ from django.shortcuts import render, loader
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.contrib import messages, auth
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from django.contrib.auth import (authenticate, login as auth_login) 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -17,6 +19,7 @@ import os
 from os import path, listdir
 from os.path import abspath, dirname, isfile, join
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SITE_ROOT = os.path.dirname(os.path.realpath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -58,6 +61,7 @@ def profile(request):
 			username = request.POST['username']
 			password = request.POST['password']
 			server = request.POST['server']
+			form = FileSearchForm()
 
 			#initialize return message variable, userInfo variable and user folder 
 			message = ""
@@ -75,7 +79,7 @@ def profile(request):
 
 			#parse through stdout and get user datasets and versions. Also set message based on status of output 
 			if returncode != 0: 
-				message = dict({"value" : 'Error Connecting to server. Ensure that you entered the corrent server, username and password. Please try again', "type" : "error"})
+				message = dict({"value" : 'Error Connecting to server. Ensure that you entered the corrent server, username and password. Please try again', "type" : "warning"})
 			else:
 				for line in stdout.splitlines(): 
 					if username in line: 
@@ -103,23 +107,21 @@ def profile(request):
 			request.session['folder'] = folder
 
 			#set user sessions information 
-			sessionInfo = dict({"username": username, "password": password, "server": server})
+			sessionInfo = dict({"username": username, "password": password, "server": server, "solution_files": False})
 			request.session['sessionInfo'] = sessionInfo
 
-			#set upload dataset form 
-			form = FileSearchForm()
 
 			#rerender profile with information
 			t = loader.get_template("profile.html")
-			c = dict({"message": message, "sessionInfo" : sessionInfo, "folder": folder, "form": form})
+			c = dict({"message": message, "sessionInfo" : sessionInfo, "folder": folder, 'form': form})
 			return HttpResponse(t.render(c, request=request)) 
 
 		#if a request is made to download a dataset
 		elif request.POST.get('downloadButton'):
-
 			#get session folder and user information
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')
+			form = FileSearchForm()
 
 			#set username, password, server and dataset 
 			username = sessionInfo["username"]
@@ -140,15 +142,14 @@ def profile(request):
 
 			# set user message based on the process returncode 
 			if returncode != 0: 
-				message = dict({"value" : 'Error downloading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "error"})
+				message = dict({"value" : 'Error downloading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
 			else: 
 				value = "Successfully Downloaded " + dataset
 				message = dict({"value" : value, "type" : "success"}) 
 
 			#rerender profile with information
 			t = loader.get_template("profile.html")
-			form = FileSearchForm()
-			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, "form": form})
+			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, 'form': form})
 			return HttpResponse(t.render(c, request=request)) 
 
 		#if request is made to launch a dataset
@@ -156,6 +157,7 @@ def profile(request):
 			#get session folder and user information
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')
+			form = FileSearchForm()
 
 			#set username, password, server and dataset 
 			username = sessionInfo["username"]
@@ -163,6 +165,7 @@ def profile(request):
 			server = sessionInfo["server"]
 			dataset = request.POST['dataset']
 			version = request.POST['version']
+			runIndex = ''
 
 			#make request to api
 			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/launch.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
@@ -179,17 +182,27 @@ def profile(request):
 			#get response based on timeout function
 			stdout,stderr,returncode = timeout(p)
 
-			# set user message based on the process returncode 
-			if returncode != 0: 
-				message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "error"})
-			else: 
-				value = "Successfully launched " + dataset
-				message = dict({"value" : value, "type" : "success"}) 
+			for line in stdout.splitlines():
+				if 'Run' in line: 
+					runIndex = re.findall(r'Run (.*?) is complete.', line, re.DOTALL)
 
+			if runIndex != '': 
+				#make request to api
+				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Solution Files/download.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				p.stdin.write(runIndex[0]+'\n')
+
+				# set user message based on the process returncode 
+				if returncode != 0: 
+					message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
+				else: 
+					value = "Successfully launched " + dataset
+					message = dict({"value" : value, "type" : "success"}) 
+			else: 
+				message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
 			#rerender profile with information
-			form = FileSearchForm()
+			sessionInfo["solution_files"] = True; 
 			t = loader.get_template("profile.html")
-			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, "form": form})
+			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, 'form': form})
 			return HttpResponse(t.render(c, request=request)) 
 
 		#if request is made to launch a dataset
@@ -202,52 +215,69 @@ def profile(request):
 			username = sessionInfo["username"]
 			password = sessionInfo["password"]
 			server = sessionInfo["server"]
-			url = request.POST['url']
-
-			#get dataset name and the location of that file
-			absolute_path = os.path.abspath(url)
-			index = absolute_path.rfind('\\')
-			if index < 0: 
-				index = absolute_path.rfind('/')
-			location_folder = absolute_path[0: index]
-			dataset = absolute_path[index+1:]
-
+			location_folder= os.path.join(os.path.dirname(BASE_DIR), 'static','media')
+			dataset=''
+			form = FileSearchForm(request.POST, request.FILES)
+			if form.is_valid(): 
+				initial_obj = form.save(commit=False)
+				initial_obj.save()
+				location_folder += str('\\' + str(initial_obj.url).replace('/', '\\')) 
+				index = location_folder.rfind('\\')
+				path = location_folder[0:index+1]
+				dataset = location_folder[index+1:]
+				form.save()
 
 			#make request to api
 			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/upload.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 			p.stdin.write(server+'\n')
 			p.stdin.write(username+'\n')
-			p.stdin.write(password+'\n')
+			p.stdin.write(password+'\n') 
 			p.stdin.write(username+'\n')
-			p.stdin.write(dataset+'\n')
-			p.stdin.write(location_folder+'\n')
+			p.stdin.write(dataset+'\n') 
+			p.stdin.write(path+'\n')
+
 
 			#get response based on timeout function
 			stdout,stderr,returncode = timeout(p)
 
 			#add new dataset to user folder
-			for line in stdout.splitlines(): 
-				folder[dataset] = line
 
 			# set user message based on the process returncode 
 			if returncode != 0: 
-				message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "error"})
+				message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
 			else: 
+				for line in stdout.splitlines(): 
+					folder[dataset] = line
 				value = "Successfully Loaded " + dataset
-				message = dict({"value" : value, "type" : "success"}) 
-			
+				message = dict({"value" : value, "type" : "success
 			#rerender profile with information
-			form = FileSearchForm()
 			t = loader.get_template("profile.html")
-			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo,"form": form})
+			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, 'form':form})
 			return HttpResponse(t.render(c, request=request)) 
-		elif request.POST.get('queryButton'):
+		elif request.POST.get('downloadSolutionButton'):
+			folder = request.session.get('folder')
+			sessionInfo = request.session.get('sessionInfo')
+			message = dict({"value": "", "type":""}); 
+			if request.POST.get('sqlite_solution'): 
+				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_sqlite3.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				stdout,stderr,returncode = timeout(p)
+				if returncode != 0: 
+					message["value"] = 'Error Downloading Solution in Sqlite Format. Please try again. If the problem persists, contact support at Energy Exemplar\n\n'
+					message["type"]= "info"
+				else: 
+					message["value"] = "Successfully downloaded solution in sqlite3 format\n"
+					message["type"]= "info"
+			if request.POST.get('pandas_solution'): 
+				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_pandas.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				stdout,stderr,returncode = timeout(p)
+				if returncode != 0: 
+					message["value"] += 'Error Downloading Solution in Pandas Format. Please try again. If the problem persists, contact support at Energy Exemplar'
+				else: 
+					message["value"] += "Successfully downloaded solution in sqlite3 format"
+					if message['type'] == "": 
+						message["type"]= "info"
 			t = loader.get_template("profile.html")
-			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo,"form": form})
-			return HttpResponse(t.render(c, request=request)) 
-		elif request.POST.get('graphButton'): 
-			t = loader.get_template("profile.html")
-			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo,"form": form})
+			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo})
 			return HttpResponse(t.render(c, request=request)) 
 
 

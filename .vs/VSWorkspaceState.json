@@ -9,8 +9,7 @@
     "\\plexos\\templates",
     "\\plexos\\templatetags",
     "\\plexos_web",
-    "\\Python-PLEXOS-API",
-    "\\Python-PLEXOS-API\\Connect Server"
+    "\\Python-PLEXOS-API"
   ],
   "SelectedNode": "\\plexos\\static\\img\\PLEXOS_2016_EE_BLACK.png",
   "PreviewInSolutionExplorer": false

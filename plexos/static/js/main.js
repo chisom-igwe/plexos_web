@@ -13,3 +13,27 @@ $(function () {
 		$('html,body').scrollTop(scrollmem);
 	});
 });
+
+$('input[type=file]').change(function () {
+	console.log(this.files[0].mozFullPath);
+});
+
+(function () {
+	$('form > div > div > input').keyup(function () {
+
+		var empty = false;
+		$('form > div > div >input[required]').each(function () {
+			if ($(this).val() === '') {
+				empty = true;
+			}
+		});
+
+		if (empty) {
+			$('#connectServerConnectButton').attr('disabled', 'disabled');
+		} else {
+
+			$('#connectServerConnectButton').prop("disabled", false);
+		}
+	});
+})();
+

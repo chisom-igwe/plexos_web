@@ -8,41 +8,51 @@
 		{% if message.type == 'success' %}
 			<h4> Currently connected to {{sessionInfo.server}} as {{sessionInfo.username}}</h4>
 		{% else %}
-		<form method="POST" action="" class="form-inline">
+		<form method="POST" action=""  name="connectForm">
 			{% csrf_token %}
-			<p>
-				<label for="inputServer">Server</label>
-				<input style="width: 25%;" name="server" type="text" class="form-control" placeholder={{ userServer }} required autofocus>
-				<label for="inputPassword">Username</label>
-				<input style="width: 25%" name="username" type="text" class="form-control" placeholder={{userUsername}} required autofocus>
-				<label for="inputPassword">Password</label>
-				<input style="width: 25%" name="password" type="password" class="form-control" placeholder="Password" required autofocus>
-			</p>
-			<div style="padding: 20px 0px">
-				<div style="float:right">
-					<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary">Connect</button>
+			<div class="form-row">
+				<div  class="form-group col-md-4">
+					<input name="server" id="server" type="text" class="form-control" placeholder="Server" required autofocus>
+				</div>
+				<div  class="form-group col-md-4">
+					<input name="username" id="username" type="text" class="form-control" placeholder="Username" required autofocus>
+				</div>
+				<div  class="form-group col-md-4">
+				<input name="password" id="password" type="password" class="form-control" placeholder="Password" required autofocus>
 				</div>
 			</div>
-		</form>
+				<div style="padding: 20px 0px">
+					<div style="float:right">
+						<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary" disabled="disabled">Connect</button>
+					</div>
+				</div>
+			
+</form>
 		{% endif %}
 	</div>
 	<hr />
 	<div class="row">
 		<h3> Upload </h3>
 		<hr />
-		<form method="post" action="">
+		{% if message.type == 'success' %}
+		<form method="post" action="" name="uploadForm" enctype="multipart/form-data">
 			{% csrf_token %}
-			<p>
-				{% if message.type == 'success' %}
-					{{ form.url }}
-				{% endif %}
-			</p>
-			<div style="padding: 20px 0px">
-				<div style="float:right">
-					<button name="uploadButton" id="connectServerUplaodButton" value="Upload&Button" type="submit" class="connect btn btn-primary">Upload</button>
+			<div class="form-row">
+				{% for field in form  %}
+					<div class="form-group col-md-5- col-md-offset-5">
+						{{ field }}
+					</div>
+				{% endfor %}
+			</div>
+			<div class="form-row">
+				<div class="form-group col-md-12">
+					<div style="float:right">
+						<button name="uploadButton" id="connectServerUploadButton" value="Upload&Button" type="submit" class="connect btn btn-primary" >Upload</button>
+					</div>
 				</div>
 			</div>
 		</form>
+		{% endif %}
 	</div>
 	<hr />
 	<div class="row" id="datasetDiv">

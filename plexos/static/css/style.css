@@ -46,13 +46,6 @@ body {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
-#connectServer {
-    display: block;
-    padding: 20px;
-    border: 10px solid #3C5083;
-    border-radius: 10px;
-    max-width: 400px;
-}
 
 .navbar-brand {
     margin: 0px;
@@ -117,9 +110,6 @@ body {
 	display: none;
 }
 
-#datasetPopupDiv{
-	display: none; 
-}
 
 figure {
 	display: inline-block;
