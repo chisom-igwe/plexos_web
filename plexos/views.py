@@ -107,7 +107,7 @@ def profile(request):
 			request.session['folder'] = folder
 
 			#set user sessions information 
-			sessionInfo = dict({"username": username, "password": password, "server": server, "solution_files": False})
+			sessionInfo = dict({"username": username, "password": password, "server": server, "solution_files": False, "connect":True})
 			request.session['sessionInfo'] = sessionInfo
 
 
@@ -215,45 +215,50 @@ def profile(request):
 			username = sessionInfo["username"]
 			password = sessionInfo["password"]
 			server = sessionInfo["server"]
-			location_folder= os.path.join(os.path.dirname(BASE_DIR), 'static','media')
+			location_folder= os.path.join(os.path.dirname(BASE_DIR), 'static','media').replace('\\', '/')
 			dataset=''
+
 			form = FileSearchForm(request.POST, request.FILES)
 			if form.is_valid(): 
 				initial_obj = form.save(commit=False)
 				initial_obj.save()
-				location_folder += str('\\' + str(initial_obj.url).replace('/', '\\')) 
-				index = location_folder.rfind('\\')
+				location_folder += str('/' + str(initial_obj.url)) 
+				index = location_folder.rfind('/')
 				path = location_folder[0:index+1]
 				dataset = location_folder[index+1:]
 				form.save()
 
-			#make request to api
-			p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/upload.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-			p.stdin.write(server+'\n')
-			p.stdin.write(username+'\n')
-			p.stdin.write(password+'\n') 
-			p.stdin.write(username+'\n')
-			p.stdin.write(dataset+'\n') 
-			p.stdin.write(path+'\n')
+				parseXMLResults = parseXML(location_folder)
+				if not parseXMLResults: 
+				#make request to api
+					p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/upload.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+					p.stdin.write(server+'\n')
+					p.stdin.write(username+'\n')
+					p.stdin.write(password+'\n') 
+					p.stdin.write(username+'\n')
+					p.stdin.write(dataset+'\n') 
+					p.stdin.write(path+'\n')
 
 
-			#get response based on timeout function
-			stdout,stderr,returncode = timeout(p)
+					#get response based on timeout function
+					stdout,stderr,returncode = timeout(p)
 
-			#add new dataset to user folder
-
-			# set user message based on the process returncode 
-			if returncode != 0: 
-				message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
-			else: 
-				for line in stdout.splitlines(): 
-					folder[dataset] = line
-				value = "Successfully Loaded " + dataset
-				message = dict({"value" : value, "type" : "success
+					# set user message based on the process returncode 
+					if returncode != 0: 
+						message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
+					else: 
+						for line in stdout.splitlines(): 
+							folder[dataset] = line
+						value = "Successfully Loaded " + dataset
+						message = dict({"value" : value, "type" : "success"})
+				else: 
+					message = dict({"value" : parseXMLResults, "type" : "warning"})
 			#rerender profile with information
 			t = loader.get_template("profile.html")
 			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, 'form':form})
 			return HttpResponse(t.render(c, request=request)) 
+
+
 		elif request.POST.get('downloadSolutionButton'):
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')

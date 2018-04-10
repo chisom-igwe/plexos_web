@@ -5,7 +5,7 @@
 	<div class="row">
 		<h3> Connect To Server </h3>
 		<hr/>
-		{% if message.type == 'success' %}
+		{% if sessionInfo.connect == True %}
 			<h4> Currently connected to {{sessionInfo.server}} as {{sessionInfo.username}}</h4>
 		{% else %}
 		<form method="POST" action=""  name="connectForm">
@@ -34,20 +34,20 @@
 	<div class="row">
 		<h3> Upload </h3>
 		<hr />
-		{% if message.type == 'success' %}
+		{% if sessionInfo.connect == True %}
 		<form method="post" action="" name="uploadForm" enctype="multipart/form-data">
 			{% csrf_token %}
 			<div class="form-row">
 				{% for field in form  %}
-					<div class="form-group col-md-5- col-md-offset-5">
-						{{ field }}
-					</div>
+				<div class="form-group col-md-5- col-md-offset-5">
+					{{ field }}
+				</div>
 				{% endfor %}
 			</div>
 			<div class="form-row">
 				<div class="form-group col-md-12">
 					<div style="float:right">
-						<button name="uploadButton" id="connectServerUploadButton" value="Upload&Button" type="submit" class="connect btn btn-primary" >Upload</button>
+						<button name="uploadButton" id="connectServerUploadButton" value="Upload&Button" type="submit" class="connect btn btn-primary">Upload</button>
 					</div>
 				</div>
 			</div>
