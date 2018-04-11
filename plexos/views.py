@@ -79,7 +79,7 @@ def profile(request):
 
 			#parse through stdout and get user datasets and versions. Also set message based on status of output 
 			if returncode != 0: 
-				message = dict({"value" : 'Error Connecting to server. Ensure that you entered the corrent server, username and password. Please try again', "type" : "warning"})
+				message = dict({"value" : 'Error Connecting to server. Ensure that you entered the corrent server, username and password. Please try again', "type" : "danger"})
 			else:
 				for line in stdout.splitlines(): 
 					if username in line: 
@@ -142,7 +142,7 @@ def profile(request):
 
 			# set user message based on the process returncode 
 			if returncode != 0: 
-				message = dict({"value" : 'Error downloading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
+				message = dict({"value" : 'Error downloading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 			else: 
 				value = "Successfully Downloaded " + dataset
 				message = dict({"value" : value, "type" : "success"}) 
@@ -193,12 +193,12 @@ def profile(request):
 
 				# set user message based on the process returncode 
 				if returncode != 0: 
-					message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
+					message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 				else: 
 					value = "Successfully launched " + dataset
 					message = dict({"value" : value, "type" : "success"}) 
 			else: 
-				message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
+				message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 			#rerender profile with information
 			sessionInfo["solution_files"] = True; 
 			t = loader.get_template("profile.html")
@@ -245,14 +245,23 @@ def profile(request):
 
 					# set user message based on the process returncode 
 					if returncode != 0: 
-						message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "warning"})
+						message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 					else: 
 						for line in stdout.splitlines(): 
 							folder[dataset] = line
 						value = "Successfully Loaded " + dataset
 						message = dict({"value" : value, "type" : "success"})
 				else: 
-					message = dict({"value" : parseXMLResults, "type" : "warning"})
+					message = dict({"value" : parseXMLResults, "type" : "danger"})
+			else: 
+				form_errors = ""
+				for key, value in form.errors.iteritems(): 
+					print value
+					#print re.sub('<[^>]*>', '', str(value))
+					#error_value = re.findall(r'<li> (.*?) </li>', str(value), re.DOTALL)
+					form_errors += re.sub('<[^>]*>', '', str(value)).replace("&#39;", "\"")
+				message = dict({"value" : form_errors, "type" : "danger"})
+
 			#rerender profile with information
 			t = loader.get_template("profile.html")
 			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, 'form':form})

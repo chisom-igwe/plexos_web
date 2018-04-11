@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django import forms
+from common import file_size
 
 # Create your models here.
 
@@ -20,4 +21,4 @@ class UserInfo(models.Model):
 		return user
 
 class Source_File(models.Model): 
-	url = models.FileField(upload_to='files\%H\%M\%S')
+	url = models.FileField(upload_to='files\%H\%M\%S',  validators=[FileExtensionValidator(allowed_extensions=['xml']), file_size])
