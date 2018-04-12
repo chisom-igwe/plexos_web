@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from threading import Timer
 from django.shortcuts import render, loader
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import RequestContext
-from django.contrib import messages, auth
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from django.contrib.auth import (authenticate, login as auth_login) 
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -14,8 +9,7 @@ from .common import *
 from .models import *
 from .forms import *
 import subprocess
-import re
-import os
+import re, os, shutil
 from os import path, listdir
 from os.path import abspath, dirname, isfile, join
 
@@ -251,45 +245,65 @@ def profile(request):
 							folder[dataset] = line
 						value = "Successfully Loaded " + dataset
 						message = dict({"value" : value, "type" : "success"})
+
+					#delete file
+					print location_folder
+					
 				else: 
 					message = dict({"value" : parseXMLResults, "type" : "danger"})
 			else: 
+				# Get the validation errors of the uploaded files 
 				form_errors = ""
 				for key, value in form.errors.iteritems(): 
-					print value
-					#print re.sub('<[^>]*>', '', str(value))
-					#error_value = re.findall(r'<li> (.*?) </li>', str(value), re.DOTALL)
 					form_errors += re.sub('<[^>]*>', '', str(value)).replace("&#39;", "\"")
 				message = dict({"value" : form_errors, "type" : "danger"})
 
 			#rerender profile with information
 			t = loader.get_template("profile.html")
 			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo, 'form':form})
-			return HttpResponse(t.render(c, request=request)) 
+			return HttpResponse(t.render(c, request=request))
 
-
+		#if request is made to download a dataset
 		elif request.POST.get('downloadSolutionButton'):
+
+			#get session folder and user information
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')
-			message = dict({"value": "", "type":""}); 
+
+			#initalize the return message to the user 
+			message = dict({"value": "", "type":""});
+			
+			#if the user request for a sqlite solution file
 			if request.POST.get('sqlite_solution'): 
+
+				#make request to api for sqlite solution and get response 
 				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_sqlite3.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 				stdout,stderr,returncode = timeout(p)
+				
+				#respond based on the returncode 
 				if returncode != 0: 
 					message["value"] = 'Error Downloading Solution in Sqlite Format. Please try again. If the problem persists, contact support at Energy Exemplar\n\n'
 					message["type"]= "info"
 				else: 
 					message["value"] = "Successfully downloaded solution in sqlite3 format\n"
 					message["type"]= "info"
+
+			#if the user request for a pandas solution file
 			if request.POST.get('pandas_solution'): 
+
+				#make request to api for pandas solution and get response 
 				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_pandas.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 				stdout,stderr,returncode = timeout(p)
+
+				#respond based on the returncode
 				if returncode != 0: 
 					message["value"] += 'Error Downloading Solution in Pandas Format. Please try again. If the problem persists, contact support at Energy Exemplar'
 				else: 
 					message["value"] += "Successfully downloaded solution in sqlite3 format"
 					if message['type'] == "": 
 						message["type"]= "info"
+
+			#rerender profile.html with information
 			t = loader.get_template("profile.html")
 			c = dict({"message": message,"folder": folder,"sessionInfo" : sessionInfo})
 			return HttpResponse(t.render(c, request=request)) 

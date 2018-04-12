@@ -22,13 +22,13 @@
 
 						<ul class="nav navbar-nav navbar-right">
 							{% if user.is_authenticated %}
-							<li><a href="">Logout</a></li>
+							<li><a href="/logout">Logout</a></li>
 							<li>
 								<a href=""
-								   class="p-r-none">Hello,{{user.username}}</a>
+								   class="p-r-none">Hello, {{user.username|capfirst }}</a>
 							</li>
 							{% else %}
-							<li><a href="">Login</a></li>
+							<li><a href="/login">Login</a></li>
 							<li><a href="" class="p-r-none">Sign Up</a></li>
 							{% endif %}
 						</ul>

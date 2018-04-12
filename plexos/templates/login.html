@@ -8,13 +8,13 @@
 		<img class="mb-4" src="{% static 'img/PLEXOS_2016_EE.png' %}" alt="" width="250" height="150">
 		<h1 class="h3 mb-3 font-weight-normal">Login</h1>
 		{% if message %}
-		{% include "messages/error.html" with message=message %}
+		{% include "messages/notif.html" with message=message type="danger"%}
 		{% endif %}
 		<label for="inputUsername" class="sr-only">Username</label>
 		<input name="username" type="text" id="inputUsername" class="form-control" placeholder="Username" required autofocus>
 		<label for="inputPassword" class="sr-only">Password</label>
 		<input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required autofocus>
-		<button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+		<button style="margin: 15px 0px" class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
 		<p class="mt-5 mb-3 text-muted">&copy; Suite 120, 3013 Douglas Blvd, Roseville, CA 95661. United States of America. 2017-2018</p>
 	</form>
   </body>

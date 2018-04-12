@@ -5,6 +5,12 @@ import xml.dom.minidom
 from django.core.exceptions import ValidationError
 from threading import Timer
 from xml.dom.minidom import parse
+
+FIVE_YEAR_MAX_DAYS = 365 * 5 
+FIVE_YEAR_MAX_WEEKS = FIVE_YEAR_MAX_DAYS/7
+FIVE_YEAR_MAX_MONTHS = FIVE_YEAR_MAX_DAYS/30
+FIVE_YEAR_MAX_YEARS = FIVE_YEAR_MAX_DAYS/365
+
 '''
 	This is where functions taht will be used by all the views will be stored
 	such functions include a timeout function
@@ -44,11 +50,11 @@ def parseXML(xmlfile):
 	if int(object_dict.get('FuelEmiGen')) > 20 or int(object_dict.get('Nodes')) > 5: 
 		message += "There is a problem with the following inputs: \n\n"
 	if int(object_dict['FuelEmiGen']) > 20: 
-		message += "The number of Fuel, Emissions and Generators exceeds 20"
+		message += "The number of Fuel, Emissions and Generators exceeds 20. "
 	if int(object_dict['Nodes']) > 5: 
-		message += "The number of Nodes exceeds 20"
+		message += "The number of Nodes exceeds 20. "
 	if int(object_dict.get('FuelEmiGen')) > 20 or int(object_dict.get('Nodes')) > 5: 
-		message += "Please adjust these features and reupload the file"
+		message += "Please adjust these features and reupload the file. "
 
 	objects = collection.getElementsByTagName("t_attribute_data")
 
@@ -66,12 +72,7 @@ def parseXML(xmlfile):
 		if object_id.childNodes[0].data == '2' and attribute_id.childNodes[0].data == '42':
 		   duration_value = int(value.childNodes[0].data); 
 
-	print duration_number 
-	print duration_value
-	if duration_number <= 7 and duration_value == 1 or duration_number == 1 and duration_value == 2: 
-		pass
-	else: 
-		message += "Please adjust your duration horizon and reupload your file. It can only be a maximum of 7 days (1 week)"
+	if duration_number > FIVE_YEAR_MAX_DAYS and duration_value == 1 or duration_number > FIVE_YEAR_MAX_WEEKS and duration_value == 2 or duration_number > FIVE_YEAR_MAX_MONTHS and duration_value == 3 or  duration_number > FIVE_YEAR_MAX_YEARS and duration_value == 4: 
+		message += "Please adjust your Medium\Long Term horizon and reupload your file. It can only be a maximum of 5 years"
 
 	return message
-	
