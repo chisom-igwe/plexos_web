@@ -45,9 +45,10 @@ def login(request):
 
 
 		
-@login_required
 def profile(request):
 	if request.method == "GET": 
+		if not request.user.is_authenticated():
+			return HttpResponseRedirect("/login/     ")
 		return render(request, "profile.html")
 	elif request.method == "POST":
 		if request.POST.get('connectButton'):
@@ -176,6 +177,7 @@ def profile(request):
 			#get response based on timeout function
 			stdout,stderr,returncode = timeout(p)
 
+
 			for line in stdout.splitlines():
 				if 'Run' in line: 
 					runIndex = re.findall(r'Run (.*?) is complete.', line, re.DOTALL)
@@ -187,7 +189,7 @@ def profile(request):
 
 				# set user message based on the process returncode 
 				if returncode != 0: 
-					message = dict({"value" : 'Error Launching dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
+					message = dict({"value" : 'Error Getting Solution Files. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 				else: 
 					value = "Successfully launched " + dataset
 					message = dict({"value" : value, "type" : "success"}) 
@@ -237,17 +239,18 @@ def profile(request):
 					#get response based on timeout function
 					stdout,stderr,returncode = timeout(p)
 
+
 					# set user message based on the process returncode 
 					if returncode != 0: 
 						message = dict({"value" : 'Error Uploading dataset. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 					else: 
 						for line in stdout.splitlines(): 
-							folder[dataset] = line
+							if "new_version" in line:  
+								folder[dataset] = re.findall(r'version (.*?)$', line, re.DOTALL)
+								print folder[dataset]
+							request.session['folder'] = folder
 						value = "Successfully Loaded " + dataset
 						message = dict({"value" : value, "type" : "success"})
-
-					#delete file
-					print location_folder
 					
 				else: 
 					message = dict({"value" : parseXMLResults, "type" : "danger"})
@@ -269,6 +272,9 @@ def profile(request):
 			#get session folder and user information
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')
+			pandas_returncode = ''
+			squalite_returncode = ''
+
 
 			#initalize the return message to the user 
 			message = dict({"value": "", "type":""});
@@ -278,30 +284,34 @@ def profile(request):
 
 				#make request to api for sqlite solution and get response 
 				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_sqlite3.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-				stdout,stderr,returncode = timeout(p)
+				stdout,stderr,squalite_returncode = timeout(p)
 				
 				#respond based on the returncode 
-				if returncode != 0: 
+				if squalite_returncode != 0: 
 					message["value"] = 'Error Downloading Solution in Sqlite Format. Please try again. If the problem persists, contact support at Energy Exemplar\n\n'
-					message["type"]= "info"
 				else: 
 					message["value"] = "Successfully downloaded solution in sqlite3 format\n"
-					message["type"]= "info"
 
 			#if the user request for a pandas solution file
 			if request.POST.get('pandas_solution'): 
 
 				#make request to api for pandas solution and get response 
 				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_pandas.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-				stdout,stderr,returncode = timeout(p)
+				stdout,stderr,pandas_returncode = timeout(p)
 
 				#respond based on the returncode
-				if returncode != 0: 
+				if pandas_returncode != 0: 
 					message["value"] += 'Error Downloading Solution in Pandas Format. Please try again. If the problem persists, contact support at Energy Exemplar'
 				else: 
 					message["value"] += "Successfully downloaded solution in sqlite3 format"
-					if message['type'] == "": 
-						message["type"]= "info"
+
+			if squalite_returncode != 0 and pandas_returncode != 0: 
+				message["type"] = "success"
+			elif squalite_returncode != 0 or pandas_returncode != 0:
+				message["type"] = "info"
+			else: 
+				message["type"] = "danger"
+
 
 			#rerender profile.html with information
 			t = loader.get_template("profile.html")

@@ -1,7 +1,9 @@
+// function to display 
 $('.connect').click(function (e) {
 	$('#loader').show(); //<----here
 })
 
+// function to change url when tab is clicked 
 $(function () {
 	var hash = window.location.hash;
 	hash && $('ul.nav a[href="' + hash + '"]').tab('show');
@@ -14,10 +16,7 @@ $(function () {
 	});
 });
 
-$('input[type=file]').change(function () {
-	console.log(this.files[0].mozFullPath);
-});
-
+// function to make connect button diabaled until input fields are filled 
 (function () {
 	$('form > div > div > input').keyup(function () {
 

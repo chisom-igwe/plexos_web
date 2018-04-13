@@ -11,7 +11,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login/$', views.login, name='login'),
 	url(r'^profile/$', views.profile, name='profile'),
-	url(r'^logout/$', auth_views.logout, name='logout'),
+	url(r'^logout/$', auth_views.logout, {'next_page': '/login/'}),
 ]
 
 if settings.DEBUG:
