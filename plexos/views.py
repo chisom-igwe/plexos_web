@@ -25,6 +25,10 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 	and redirects them to the profile page if logged in 
 	or sends back to login page if there is an error
 '''
+
+def home(request): 
+	if request.method == 'GET':
+		return HttpResponseRedirect("/login/")
 def login(request):
 	_message = ""
 	if request.method == 'POST':
@@ -48,7 +52,7 @@ def login(request):
 def profile(request):
 	if request.method == "GET": 
 		if not request.user.is_authenticated():
-			return HttpResponseRedirect("/login/     ")
+			return HttpResponseRedirect("/login/")
 		return render(request, "profile.html")
 	elif request.method == "POST":
 		if request.POST.get('connectButton'):
@@ -149,6 +153,7 @@ def profile(request):
 
 		#if request is made to launch a dataset
 		elif request.POST.get('launchButton'):
+			print "in here"
 			#get session folder and user information
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')
@@ -182,10 +187,13 @@ def profile(request):
 				if 'Run' in line: 
 					runIndex = re.findall(r'Run (.*?) is complete.', line, re.DOTALL)
 
+			print runIndex
 			if runIndex != '': 
 				#make request to api
+				print "a"
 				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Solution Files/download.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 				p.stdin.write(runIndex[0]+'\n')
+				print "b"
 
 				# set user message based on the process returncode 
 				if returncode != 0: 
@@ -211,7 +219,7 @@ def profile(request):
 			username = sessionInfo["username"]
 			password = sessionInfo["password"]
 			server = sessionInfo["server"]
-			location_folder= os.path.join(os.path.dirname(BASE_DIR), 'static','media').replace('\\', '/')
+			location_folder= os.path.join(BASE_DIR, 'static','media').replace('\\', '/')
 			dataset=''
 
 			form = FileSearchForm(request.POST, request.FILES)
@@ -281,7 +289,6 @@ def profile(request):
 			
 			#if the user request for a sqlite solution file
 			if request.POST.get('sqlite_solution'): 
-
 				#make request to api for sqlite solution and get response 
 				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Connect Server/query_to_sqlite3.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
 				stdout,stderr,squalite_returncode = timeout(p)

@@ -5,7 +5,7 @@
 	<div class="row">
 		<h3> Connect To Server </h3>
 		<hr/>
-		{% if sessionInfo.connect == True %}
+		{% if sessionInfo.connect == True and message.type == "success" %}
 			<h4> Currently connected to {{sessionInfo.server}} as {{sessionInfo.username}}</h4>
 		{% else %}
 		<form method="POST" action=""  name="connectForm">
