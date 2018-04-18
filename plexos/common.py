@@ -23,7 +23,7 @@ def file_size(value): # add this to some file where you can import it from
 
 def timeout(cmd):
 	kill = lambda process: process.kill()
-	my_timer = Timer(20.0, kill, [cmd])
+	my_timer = Timer(30.0, kill, [cmd])
 	try:
 		my_timer.start()
 		stdout, stderr = cmd.communicate()

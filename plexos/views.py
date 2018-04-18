@@ -153,7 +153,6 @@ def profile(request):
 
 		#if request is made to launch a dataset
 		elif request.POST.get('launchButton'):
-			print "in here"
 			#get session folder and user information
 			folder = request.session.get('folder')
 			sessionInfo = request.session.get('sessionInfo')
@@ -187,16 +186,17 @@ def profile(request):
 				if 'Run' in line: 
 					runIndex = re.findall(r'Run (.*?) is complete.', line, re.DOTALL)
 
-			print runIndex
 			if runIndex != '': 
 				#make request to api
-				print "a"
-				p = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Solution Files/download.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-				p.stdin.write(runIndex[0]+'\n')
-				print "b"
+				dp = subprocess.Popen(['python2', os.path.join(SITE_ROOT + '../../Python-PLEXOS-API/Solution Files/download.py')], stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+				dp.stdin.write(server+'\n')
+				dp.stdin.write(username+'\n')
+				dp.stdin.write(password+'\n')
+				dp.stdin.write(runIndex[0]+'\n')
+				stdout_dp,stderr_dp,returncode_dp = timeout(dp)
 
 				# set user message based on the process returncode 
-				if returncode != 0: 
+				if returncode_dp != 0: 
 					message = dict({"value" : 'Error Getting Solution Files. Please try again. If the problem persists, contact support at Energy Exemplar', "type" : "danger"})
 				else: 
 					value = "Successfully launched " + dataset
@@ -255,7 +255,6 @@ def profile(request):
 						for line in stdout.splitlines(): 
 							if "new_version" in line:  
 								folder[dataset] = re.findall(r'version (.*?)$', line, re.DOTALL)
-								print folder[dataset]
 							request.session['folder'] = folder
 						value = "Successfully Loaded " + dataset
 						message = dict({"value" : value, "type" : "success"})
