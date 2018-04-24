@@ -23,7 +23,7 @@
 			</div>
 				<div style="padding: 20px 0px">
 					<div style="float:right">
-						<button name="connectButton" id="connectServerConnectButton" value="Connect&Button" type="submit" class="connect btn btn-primary" disabled="disabled">Connect</button>
+						<button name="connectButton" id="connectServerConnectButton" data-toggle="tooltip" title="This connects to Plexos Connect" value="Connect&Button" type="submit" class="connect btn btn-primary" disabled="disabled">Connect</button>
 					</div>
 				</div>
 			
@@ -47,7 +47,7 @@
 			<div class="form-row">
 				<div class="form-group col-md-12">
 					<div style="float:right">
-						<button name="uploadButton" id="connectServerUploadButton" value="Upload&Button" type="submit" class="connect btn btn-primary">Upload</button>
+						<button name="uploadButton" id="connectServerUploadButton" data-toggle="tooltip" title="This will upload the dataset to your plexos connect folder" value="Upload&Button" type="submit" class="connect btn btn-primary">Upload</button>
 					</div>
 				</div>
 			</div>
@@ -77,8 +77,8 @@
 									<input style=" display: none" name="dataset" type="text"  class="form-control" value="{{dataset}}" required autofocus />
 									<input style=" display: none" name="version" type="text"  class="form-control" value="{{versions|last}}" required autofocus />
 								</p>
-								<button name="downloadButton" value="download&Button" type="submit" class="connect btn btn-primary">Download</button>
-								<button name="launchButton" value="launch&Button" type="submit" class="connect btn btn-primary">Launch</button>
+								<button name="downloadButton" data-toggle="tooltip" title="This will download the {{dataset}} dataset" value="download&Button" type="submit" class="connect btn btn-primary">Download</button>
+								<button name="launchButton" data-toggle="tooltip" title="This will run the {{dataset}} dataset in plexos" value="launch&Button" type="submit" class="connect btn btn-primary">Launch</button>
 							</form>
 						</div>
 					</div>
